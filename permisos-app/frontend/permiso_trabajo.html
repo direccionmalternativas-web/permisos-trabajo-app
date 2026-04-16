@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--brand:#1a3a5c;--brand2:#0e6ba8;--accent:#e8f4fd;--border:#d0dce8;--text:#1a2332;--muted:#5a6a7a;--surface:#f5f8fc;--white:#fff;--radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.07);--green:#1b7a3e;--red:#b91c1c}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:var(--text);background:var(--surface);padding:16px}
+.header{background:linear-gradient(135deg,var(--brand) 0%,var(--brand2) 100%);color:#fff;border-radius:var(--radius);padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;gap:16px}
+.header-logo{width:54px;height:54px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;letter-spacing:-1px;border:2px solid rgba(255,255,255,0.3);flex-shrink:0}
+.header-text h1{font-size:17px;font-weight:700;letter-spacing:0.3px;margin-bottom:2px}
+.header-text p{font-size:11px;opacity:0.8;letter-spacing:0.5px;text-transform:uppercase}
+.badge-os{margin-left:auto;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 14px;text-align:center;flex-shrink:0}
+.badge-os label{font-size:9px;opacity:0.75;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:2px}
+.badge-os input{background:transparent;border:none;color:#fff;font-size:14px;font-weight:700;width:100px;outline:none;text-align:center}
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface)}
+.card-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--brand)}
+.card-body{padding:14px 16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px}
+.field input,.field textarea,.field select{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;background:var(--white);outline:none;color:var(--text);transition:border 0.2s;font-family:inherit}
+.field input:focus,.field textarea:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(14,107,168,0.1)}
+.field textarea{resize:vertical;min-height:44px}
+.tipos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tipo-btn{border:1.5px solid var(--border);padding:10px 8px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;text-transform:uppercase;background:var(--white);border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all 0.18s;color:var(--muted);user-select:none}
+.tipo-btn .tipo-ico{font-size:20px}
+.tipo-btn:hover{border-color:var(--brand2);color:var(--brand2);background:var(--accent)}
+.tipo-btn.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.check-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background 0.15s}
+.check-item:hover{background:var(--accent)}
+.check-item input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--brand2);flex-shrink:0}
+.check-item label{font-size:11px;cursor:pointer;color:var(--text)}
+.insp-block{margin-bottom:10px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.insp-block-title{background:var(--brand);color:#fff;padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px}
+.insp-table{width:100%;border-collapse:collapse;font-size:11px}
+.insp-table th{background:var(--surface);color:var(--muted);padding:6px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;border-bottom:1px solid var(--border)}
+.insp-table td{border-bottom:0.5px solid var(--border);padding:6px 10px;vertical-align:middle}
+.insp-table tr:last-child td{border-bottom:none}
+.insp-table tr:hover td{background:#f0f6fb}
+.radio-group{display:flex;gap:10px;justify-content:center}
+.radio-group label{display:flex;align-items:center;gap:3px;cursor:pointer;font-size:11px;color:var(--muted);font-weight:600}
+.radio-group input[type=radio]{accent-color:var(--brand2);cursor:pointer}
+.personas-table{width:100%;border-collapse:collapse;font-size:11px}
+.personas-table th{background:var(--brand);color:#fff;padding:7px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;text-align:left}
+.personas-table td{border-bottom:0.5px solid var(--border);padding:4px 6px}
+.personas-table tr:last-child td{border-bottom:none}
+.personas-table input{border:none;border-bottom:1px solid transparent;padding:4px;font-size:11px;width:100%;outline:none;background:transparent;transition:border 0.2s;font-family:inherit}
+.personas-table input:focus{border-bottom-color:var(--brand2)}
+.firmas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:4px}
+.firma-box{border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.firma-linea{height:52px;border-bottom:1.5px solid var(--brand);margin-bottom:8px}
+.firma-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.4px}
+.steps{display:flex;gap:0;margin-bottom:16px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.step{flex:1;padding:8px 4px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);background:var(--white);border-right:1px solid var(--border);cursor:pointer;transition:all 0.2s;letter-spacing:0.3px}
+.step:last-child{border-right:none}
+.step.active{background:var(--brand);color:#fff}
+.step .step-num{display:block;font-size:16px;margin-bottom:1px}
+.page-content{display:none}
+.page-content.active{display:block}
+.empty-state{text-align:center;padding:24px;color:var(--muted);font-size:12px;font-style:italic}
+.nav-row{display:flex;justify-content:space-between;margin-top:12px}
+.btn-nav{background:var(--white);color:var(--brand);border:1.5px solid var(--brand);border-radius:7px;padding:8px 22px;font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;transition:all 0.18s}
+.btn-nav:hover{background:var(--brand);color:#fff}
+.btn-nav.next{background:var(--brand);color:#fff}
+.btn-nav.next:hover{background:var(--brand2)}
+.progress-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:14px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:2px;transition:width 0.3s}
+.btn{border-radius:6px;padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all 0.18s;text-transform:uppercase;letter-spacing:0.4px}
+.btn-add{background:var(--accent);color:var(--brand2);border:1.5px solid var(--brand2)}
+.btn-add:hover{background:var(--brand2);color:#fff}
+/* EXPORT BUTTONS */
+.export-row{display:flex;gap:10px;margin:16px 0 4px;justify-content:center;flex-wrap:wrap}
+.btn-export{display:flex;align-items:center;gap:8px;padding:11px 28px;font-size:13px;font-weight:700;border:none;border-radius:8px;cursor:pointer;letter-spacing:0.5px;text-transform:uppercase;transition:all 0.2s;flex:1;max-width:240px;justify-content:center}
+.btn-pdf{background:#b91c1c;color:#fff}
+.btn-pdf:hover{background:#991b1b}
+.btn-excel{background:#1b7a3e;color:#fff}
+.btn-excel:hover{background:#145e30}
+.btn-export:active{transform:scale(0.97)}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a3a5c;color:#fff;padding:10px 24px;border-radius:8px;font-size:12px;font-weight:700;opacity:0;transition:all 0.35s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.tag{display:inline-block;background:var(--accent);color:var(--brand2);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
+@media print{
+  body{background:#fff;padding:0}
+  .steps,.nav-row,.export-row,.btn-add,.no-print{display:none!important}
+  .page-content{display:block!important}
+  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  .header,.insp-block-title,.card-header,.personas-table th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">NI</div>
+  <div class="header-text">
+    <h1>Negocios Industriales Real S.A.</h1>
+    <p>Permiso de Trabajo — Planta Industrial — NIRSA Contratista</p>
+  </div>
+  <div class="badge-os">
+    <label>Orden de Servicio</label>
+    <input type="text" id="os" placeholder="N.º OS"/>
+  </div>
+</div>
+
+<div class="steps" id="steps-bar">
+  <div class="step active" onclick="goTo(0)"><span class="step-num">①</span>Datos</div>
+  <div class="step" onclick="goTo(1)"><span class="step-num">②</span>Tipo / Riesgos</div>
+  <div class="step" onclick="goTo(2)"><span class="step-num">③</span>Inspecciones</div>
+  <div class="step" onclick="goTo(3)"><span class="step-num">④</span>Personal</div>
+  <div class="step" onclick="goTo(4)"><span class="step-num">⑤</span>Exportar</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="prog" style="width:20%"></div></div>
+
+<!-- PAGE 0 -->
+<div class="page-content active" id="pg0">
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#e8f4fd;color:#0e6ba8">📋</div><span class="card-title">Datos Generales del Trabajo</span></div>
+    <div class="card-body">
+      <div class="grid4" style="margin-bottom:12px">
+        <div class="field"><label>Fecha</label><input type="date" id="fecha"/></div>
+        <div class="field"><label>N.º Trabajadores</label><input type="number" id="ntrab" min="1" placeholder="0"/></div>
+        <div class="field"><label>Hora Inicio</label><input type="time" id="hinicio"/></div>
+        <div class="field"><label>Hora Final</label><input type="time" id="hfinal"/></div>
+      </div>
+      <div class="grid2" style="margin-bottom:12px">
+        <div class="field"><label>Área / Ubicación en Planta</label><input type="text" id="area" placeholder="Ej: Planta de Proceso — Nivel 2"/></div>
+        <div class="field"><label>Responsable del Trabajo</label><input type="text" id="resp" placeholder="Nombre del encargado"/></div>
+      </div>
+      <div class="field" style="margin-bottom:10px"><label>Descripción del Trabajo</label><textarea id="desc" placeholder="Describa detalladamente la actividad a realizar…"></textarea></div>
+      <div class="field"><label>Herramientas y Equipos a Utilizar</label><textarea id="herr" placeholder="Liste herramientas, equipos y materiales…"></textarea></div>
+    </div>
+  </div>
+  <div class="nav-row"><span></span><button class="btn-nav next" onclick="goTo(1)">Siguiente →</button></div>
+</div>
+
+<!-- PAGE 1 -->
+<div class="page-content" id="pg1">
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#fff3e0;color:#e65100">⚡</div><span class="card-title">Tipo de Permiso</span><span class="tag no-print" style="margin-left:auto">Selección múltiple</span></div>
+    <div class="card-body">
+      <div class="tipos-grid" id="tipos">
+        <div class="tipo-btn" data-tipo="frio"><span class="tipo-ico">🔒</span>Trabajo en Frío</div>
+        <div class="tipo-btn" data-tipo="caliente"><span class="tipo-ico">🔥</span>Trabajo en Caliente</div>
+        <div class="tipo-btn" data-tipo="altura"><span class="tipo-ico">🪜</span>Trabajo en Altura</div>
+        <div class="tipo-btn" data-tipo="electrico"><span class="tipo-ico">⚡</span>Alta / Media Tensión</div>
+        <div class="tipo-btn" data-tipo="quimicos"><span class="tipo-ico">🧪</span>Trabajo con Químicos</div>
+        <div class="tipo-btn" data-tipo="inmersion"><span class="tipo-ico">🤿</span>Trabajo de Inmersión</div>
+        <div class="tipo-btn" data-tipo="combustible"><span class="tipo-ico">⛽</span>Transferencia Combustible</div>
+        <div class="tipo-btn" data-tipo="confinado"><span class="tipo-ico">🕳️</span>Espacios Confinados</div>
+        <div class="tipo-btn" data-tipo="izaje"><span class="tipo-ico">🏗️</span>Izaje de Cargas</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#fce4ec;color:#c62828">⚠️</div><span class="card-title">Riesgos Presentes</span></div>
+    <div class="card-body">
+      <div class="check-grid" id="riesgos-grid"></div>
+      <div class="field" style="margin-top:10px"><label>Otros riesgos</label><input type="text" id="otros-riesgos" placeholder="Especifique…"/></div>
+      <p style="font-size:10px;color:var(--muted);margin-top:8px;padding:8px;background:var(--surface);border-radius:6px;border-left:3px solid var(--brand2)">Se realizó el análisis de la tarea y se dio a conocer los riesgos al personal involucrado.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#e8f5e9;color:#2e7d32">🦺</div><span class="card-title">EPP Requerido</span></div>
+    <div class="card-body"><div class="check-grid" id="epp-grid"></div></div>
+  </div>
+  <div class="nav-row"><button class="btn-nav" onclick="goTo(0)">← Anterior</button><button class="btn-nav next" onclick="goTo(2)">Siguiente →</button></div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page-content" id="pg2">
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#ede7f6;color:#4527a0">🔍</div><span class="card-title">Inspecciones Específicas</span></div>
+    <div class="card-body" id="insp-body"><div class="empty-state">Regrese al paso anterior y seleccione uno o más tipos de permiso.</div></div>
+  </div>
+  <div class="nav-row"><button class="btn-nav" onclick="goTo(1)">← Anterior</button><button class="btn-nav next" onclick="goTo(3)">Siguiente →</button></div>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page-content" id="pg3">
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#e3f2fd;color:#1565c0">👥</div><span class="card-title">Personas Involucradas</span></div>
+    <div class="card-body">
+      <table class="personas-table">
+        <thead><tr><th>#</th><th>Nombres y Apellidos</th><th>Cédula / Código</th><th>Cargo / Función</th><th>Empresa</th><th style="width:60px">Firma</th></tr></thead>
+        <tbody id="personas-tbody"></tbody>
+      </table>
+      <button class="btn btn-add no-print" style="margin-top:10px" onclick="addPersona()">+ Agregar Persona</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#fff8e1;color:#f57f17">📝</div><span class="card-title">Observaciones Generales</span></div>
+    <div class="card-body"><div class="field"><textarea id="obs" placeholder="Observaciones relevantes…" style="min-height:60px"></textarea></div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#e8f4fd;color:#0e6ba8">✅</div><span class="card-title">Autorizaciones y Firmas</span></div>
+    <div class="card-body">
+      <p style="font-size:11px;color:var(--muted);margin-bottom:14px">Al firmar, los responsables confirman haber revisado las condiciones de seguridad y autorizan la ejecución del trabajo.</p>
+      <div class="firmas-grid">
+        <div class="firma-box"><div class="firma-linea"></div><div class="firma-label">Seguridad Industrial</div><div class="field" style="margin-top:6px"><input type="text" id="firma1" placeholder="Nombre y cédula"/></div></div>
+        <div class="firma-box"><div class="firma-linea"></div><div class="firma-label">Supervisor de Obra</div><div class="field" style="margin-top:6px"><input type="text" id="firma2" placeholder="Nombre y cédula"/></div></div>
+        <div class="firma-box"><div class="firma-linea"></div><div class="firma-label">Gerente / Jefe de Área</div><div class="field" style="margin-top:6px"><input type="text" id="firma3" placeholder="Nombre y cédula"/></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row"><button class="btn-nav" onclick="goTo(2)">← Anterior</button><button class="btn-nav next" onclick="goTo(4)">Ver Exportar →</button></div>
+</div>
+
+<!-- PAGE 4: EXPORT -->
+<div class="page-content" id="pg4">
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#e8f5e9;color:#1b7a3e">📊</div><span class="card-title">Resumen del Permiso</span></div>
+    <div class="card-body" id="resumen-body"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-icon" style="background:#fce4ec;color:#b91c1c">📤</div><span class="card-title">Exportar Documento</span></div>
+    <div class="card-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Seleccione el formato de exportación. El PDF preserva el diseño visual completo para archivar o imprimir. El Excel genera un archivo estructurado con todos los datos del permiso para registro y gestión.</p>
+      <div class="export-row">
+        <button class="btn-export btn-pdf" onclick="exportPDF()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Exportar PDF
+        </button>
+        <button class="btn-export btn-excel" onclick="exportExcel()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="8" y1="9" x2="10" y2="9"/></svg>
+          Exportar Excel
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row"><button class="btn-nav" onclick="goTo(3)">← Anterior</button><span></span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let currentPage=0;
+function goTo(n){
+  document.querySelectorAll('.page-content').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===n));
+  document.getElementById('prog').style.width=((n+1)/5*100)+'%';
+  currentPage=n;
+  if(n===4)buildResumen();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+const riesgos=["Explosión","Incendios","Contactos Térmicos","Contactos Eléctricos","Contactos con sust. cáusticas","Caídas a distinto nivel","Caídas al mismo nivel","Caídas de objetos","Atropellamiento","Atrapamiento por objetos","Choques contra obj. inmóviles","Proyección de fragmentos","Exposición a radiaciones","Golpes por herramientas","Aplastamiento","Sobreesfuerzos","Exp. a temperaturas extremas","Agentes físicos","Agentes biológicos","Agentes químicos","Accidentes de tráfico"];
+const epp=["Casco","Careta de soldadura","Gafas de seguridad","Protección Facial","Mascarilla con filtros","Traje Químico","Traje Térmico","Equipo respiración autónomo","Guantes","Protección auditiva","Arnés / Línea de vida","Cinta de peligro / Conos","Extintor","Calzado de seguridad","Mandil"];
+
+const inspData={
+  frio:{label:"Trabajo en Frío (LOTO)",cols:["Inspección General","Inspección Máquinas"],items:[["Se identificaron y aislaron fuentes de energía","La máquina tiene parada de emergencia"],["Se revisó cierre de válvulas y purgado","La máquina posee guarda de seguridad"],["Se comprueba ausencia de energía residual","Personal cuenta con candados LOTO"],["Personal capacitado y conoce LOTO",""]]},
+  caliente:{label:"Trabajo en Caliente",cols:["Inspección General","Equipo Oxicorte"],items:[["Equipos en buen estado","Tanques asegurados verticalmente"],["Área correctamente aislada","Manómetros funcionan"],["Personas/materiales que puedan ser afectados","Válvulas y mangueras correctas"],["Atmósfera inflamable — % LEL ≤ 1%","Inspección equipo de soldadura"],["Conexión a tierra correcta","Conexión eléctrica correcta"],["","Cables y terminales correctos"]]},
+  altura:{label:"Trabajo en Altura (>1,80m)",cols:["Inspección General","Escaleras / Andamios"],items:[["Personal con experiencia en alturas","Largueros en buen estado"],["Área correctamente aislada","Escalones en buen estado"],["Puntos de anclaje/líneas de vida determinados","Escalera asegurada a estructura fija"],["Costuras del arnés en buen estado","Crucetas en buen estado"],["Seguros y ganchos en buen estado","Cuerpos del andamio en buen estado"],["Colocación correcta del arnés","Terreno apropiado"],["Eslingas con absorción de caídas","Nivelado sobre base firme"],["Forma correcta de anclaje determinada","Llantas y frenos en buenas condiciones"],["","Tablones resistentes y amarrados"]]},
+  electrico:{label:"Alta/Media Tensión (>600V)",cols:["Inspección General","Observaciones"],items:[["Personal autorizado para alta tensión",""],["Área correctamente aislada",""],["Herramientas con aislamiento adecuado",""]]},
+  quimicos:{label:"Trabajos con Químicos",cols:["Inspección General","Observaciones"],items:[["Área aislada y ventilada",""],["Mangueras, conexiones y válvulas OK",""],["Envases y embalajes en buen estado",""]]},
+  inmersion:{label:"Trabajos de Inmersión",cols:["Inspección General","Equipo de Buceo"],items:[["Trabajo planificado con supervisor","Mangueras en buen estado"],["Condiciones del mar evaluadas","Máscara de buceo OK"],["Buzos con matrícula SPTMF","Aletas en buen estado"],["Comunicación para emergencias","Profundímetro/Reloj submarino"]]},
+  combustible:{label:"Transferencia de Combustible",cols:["Inspección General","Observaciones"],items:[["Área correctamente aislada",""],["Mangueras, conexiones sin fuga",""],["Actividades en caliente paralizadas",""],["Extintor disponible",""]]},
+  confinado:{label:"Espacios Confinados",cols:["Inspección General","Ventilación"],items:[["Área correctamente aislada","Ventilador"],["Extintor disponible","Tiro Inducido"],["Personal con experiencia","Aire Natural"],["Superficie segura para trabajar","Equipo Auto Contenido"],["Medida % O2 (19,5%-23%)","Línea de Aire"],["Medida % LEL (máx 1%)",""]]},
+  izaje:{label:"Izaje de Cargas",cols:["Inspección General","Estrobos"],items:[["Líneas eléctricas cercanas verificadas","Verificación de uniones"],["Equipo adecuado para el peso","Verificación de hilos"],["Maniobra planificada","Inspección de tecles"],["Área correctamente aislada","Seguro en buen estado"],["Grúa en sitio seguro y estable","Cadena en buen estado"],["Puntos de anclaje apropiados","Pestillo de seguridad"],["Aseguramiento de la carga","Punto de anclaje apropiado"],["Verificación de la pasteca","La carga es apropiada"]]}
+};
+
+const activeTipos=new Set();
+
+function renderChecks(items,cid){
+  const c=document.getElementById(cid);c.innerHTML='';
+  items.forEach(t=>{
+    const id='chk_'+t.replace(/\W/g,'_');
+    const d=document.createElement('div');d.className='check-item';
+    d.innerHTML=`<input type="checkbox" id="${id}"><label for="${id}">${t}</label>`;
+    c.appendChild(d);
+  });
+}
+
+function radios(n){
+  return `<div class="radio-group"><label><input type="radio" name="${n}" value="SI"> Sí</label><label><input type="radio" name="${n}" value="N/A"> N/A</label></div>`;
+}
+
+function renderInspecciones(){
+  const body=document.getElementById('insp-body');
+  if(!activeTipos.size){body.innerHTML='<div class="empty-state">Regrese al paso anterior y seleccione uno o más tipos de permiso.</div>';return;}
+  let html='';
+  activeTipos.forEach(tipo=>{
+    const d=inspData[tipo];if(!d)return;
+    html+=`<div class="insp-block"><div class="insp-block-title">${d.label}</div>
+    <table class="insp-table"><thead><tr>
+      <th style="width:38%">${d.cols[0]}</th><th style="width:9%;text-align:center">Sí</th><th style="width:9%;text-align:center">N/A</th>
+      <th style="width:35%">${d.cols[1]}</th><th style="width:9%;text-align:center">Sí</th><th style="width:9%;text-align:center">N/A</th>
+    </tr></thead><tbody>`;
+    d.items.forEach((row,i)=>{
+      const n1=`${tipo}_L_${i}`,n2=`${tipo}_R_${i}`;
+      html+=`<tr>
+        <td>${row[0]}</td>${row[0]?`<td>${radios(n1)}</td><td></td>`:'<td></td><td></td>'}
+        <td>${row[1]}</td>${row[1]?`<td>${radios(n2)}</td><td></td>`:'<td></td><td></td>'}
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  });
+  body.innerHTML=html;
+}
+
+document.getElementById('tipos').addEventListener('click',e=>{
+  const btn=e.target.closest('.tipo-btn');if(!btn)return;
+  const t=btn.dataset.tipo;
+  activeTipos.has(t)?(activeTipos.delete(t),btn.classList.remove('active')):(activeTipos.add(t),btn.classList.add('active'));
+  renderInspecciones();
+});
+
+function addPersona(){
+  const tbody=document.getElementById('personas-tbody');
+  const n=tbody.rows.length+1;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="text-align:center;font-weight:700;color:var(--muted)">${n}</td>
+    <td><input type="text" placeholder="Nombre completo"/></td>
+    <td><input type="text" placeholder="0000000000"/></td>
+    <td><input type="text" placeholder="Cargo"/></td>
+    <td><input type="text" placeholder="Empresa"/></td>
+    <td style="height:32px"></td>`;
+  tbody.appendChild(tr);
+}
+
+function getPersonas(){
+  return [...document.querySelectorAll('#personas-tbody tr')].map(tr=>{
+    const ins=[...tr.querySelectorAll('input')];
+    return{nombre:ins[0]?.value||'',cedula:ins[1]?.value||'',cargo:ins[2]?.value||'',empresa:ins[3]?.value||''};
+  }).filter(p=>p.nombre||p.cedula);
+}
+
+function getInspecciones(){
+  const result=[];
+  activeTipos.forEach(tipo=>{
+    const d=inspData[tipo];if(!d)return;
+    d.items.forEach((row,i)=>{
+      if(row[0]){
+        const v=document.querySelector(`input[name="${tipo}_L_${i}"]:checked`);
+        result.push({tipo:d.label,seccion:d.cols[0],item:row[0],respuesta:v?v.value:''});
+      }
+      if(row[1]){
+        const v=document.querySelector(`input[name="${tipo}_R_${i}"]:checked`);
+        result.push({tipo:d.label,seccion:d.cols[1],item:row[1],respuesta:v?v.value:''});
+      }
+    });
+  });
+  return result;
+}
+
+function buildResumen(){
+  const os=document.getElementById('os').value||'—';
+  const fecha=document.getElementById('fecha').value||'—';
+  const area=document.getElementById('area').value||'—';
+  const ntrab=document.getElementById('ntrab').value||'—';
+  const resp=document.getElementById('resp').value||'—';
+  const tipos=[...activeTipos].map(t=>inspData[t]?.label||t).join(', ')||'Ninguno';
+  const rsel=[...document.querySelectorAll('#riesgos-grid input:checked')].map(c=>c.nextElementSibling.textContent).join(', ')||'Ninguno';
+  const eppsel=[...document.querySelectorAll('#epp-grid input:checked')].map(c=>c.nextElementSibling.textContent).join(', ')||'Ninguno';
+  const personas=getPersonas();
+  document.getElementById('resumen-body').innerHTML=`
+  <div class="grid4" style="gap:8px;margin-bottom:10px">
+    ${[['Orden de Servicio',os],['Fecha',fecha],['Trabajadores',ntrab],['Responsable',resp]].map(([l,v])=>`
+    <div style="background:var(--surface);border-radius:7px;padding:10px 12px">
+      <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:3px">${l}</div>
+      <div style="font-size:13px;font-weight:700">${v}</div>
+    </div>`).join('')}
+  </div>
+  ${[['Área / Ubicación',area],['Tipos de Permiso',tipos],['Riesgos Identificados',rsel],['EPP Requerido',eppsel]].map(([l,v])=>`
+  <div style="background:var(--surface);border-radius:7px;padding:10px 12px;margin-bottom:6px">
+    <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:3px">${l}</div>
+    <div style="font-size:11px">${v}</div>
+  </div>`).join('')}
+  <div style="background:var(--surface);border-radius:7px;padding:10px 12px">
+    <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Personal (${personas.length} personas)</div>
+    ${personas.length?personas.map(p=>`<div style="font-size:11px;padding:2px 0;border-bottom:0.5px solid var(--border)">${p.nombre}${p.cargo?' — '+p.cargo:''}${p.empresa?' | '+p.empresa:''}</div>`).join(''):'<span style="font-size:11px;color:var(--muted)">Sin registros</span>'}
+  </div>`;
+}
+
+/* ── EXPORT PDF ── */
+function exportPDF(){
+  showToast('⏳ Preparando PDF…');
+  setTimeout(()=>{
+    window.print();
+    showToast('✅ Use "Guardar como PDF" en el diálogo de impresión');
+  },200);
+}
+
+/* ── EXPORT EXCEL ── */
+function exportExcel(){
+  showToast('⏳ Generando Excel…');
+  try{
+    const wb=XLSX.utils.book_new();
+    const os=document.getElementById('os').value||'';
+    const fecha=document.getElementById('fecha').value||'';
+    const area=document.getElementById('area').value||'';
+    const ntrab=document.getElementById('ntrab').value||'';
+    const hinicio=document.getElementById('hinicio').value||'';
+    const hfinal=document.getElementById('hfinal').value||'';
+    const resp=document.getElementById('resp').value||'';
+    const desc=document.getElementById('desc').value||'';
+    const herr=document.getElementById('herr').value||'';
+    const obs=document.getElementById('obs').value||'';
+    const tipos=[...activeTipos].map(t=>inspData[t]?.label||t).join(', ');
+    const rsel=[...document.querySelectorAll('#riesgos-grid input:checked')].map(c=>c.nextElementSibling.textContent).join(', ');
+    const eppsel=[...document.querySelectorAll('#epp-grid input:checked')].map(c=>c.nextElementSibling.textContent).join(', ');
+    const f1=document.getElementById('firma1').value||'';
+    const f2=document.getElementById('firma2').value||'';
+    const f3=document.getElementById('firma3').value||'';
+
+    /* SHEET 1: DATOS GENERALES */
+    const ws1Data=[
+      ['PERMISO DE TRABAJO — NEGOCIOS INDUSTRIALES REAL S.A.'],[''],
+      ['DATOS GENERALES'],
+      ['Orden de Servicio',os],['Fecha',fecha],['Hora Inicio',hinicio],['Hora Final',hfinal],
+      ['N.º Trabajadores',ntrab],['Área / Ubicación',area],['Responsable',resp],
+      ['Descripción del Trabajo',desc],['Herramientas / Equipos',herr],[''],
+      ['TIPOS DE PERMISO'],['',tipos],[''],
+      ['RIESGOS IDENTIFICADOS'],['',rsel],[''],
+      ['EPP REQUERIDO'],['',eppsel],[''],
+      ['OBSERVACIONES'],['',obs],[''],
+      ['FIRMAS Y AUTORIZACIONES'],
+      ['Seguridad Industrial',f1],['Supervisor de Obra',f2],['Gerente / Jefe de Área',f3]
+    ];
+    const ws1=XLSX.utils.aoa_to_sheet(ws1Data);
+    ws1['!cols']=[{wch:28},{wch:60}];
+    ws1['A1'].s={font:{bold:true,sz:14}};
+    XLSX.utils.book_append_sheet(wb,ws1,'Datos Generales');
+
+    /* SHEET 2: INSPECCIONES */
+    const inspRows=[['INSPECCIONES ESPECÍFICAS'],[''],
+      ['Tipo de Permiso','Sección','Ítem de Inspección','Respuesta']];
+    getInspecciones().forEach(r=>inspRows.push([r.tipo,r.seccion,r.item,r.respuesta]));
+    const ws2=XLSX.utils.aoa_to_sheet(inspRows);
+    ws2['!cols']=[{wch:28},{wch:22},{wch:52},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,ws2,'Inspecciones');
+
+    /* SHEET 3: PERSONAL */
+    const persRows=[['PERSONAS INVOLUCRADAS'],[''],
+      ['#','Nombres y Apellidos','Cédula / Código','Cargo / Función','Empresa']];
+    getPersonas().forEach((p,i)=>persRows.push([i+1,p.nombre,p.cedula,p.cargo,p.empresa]));
+    const ws3=XLSX.utils.aoa_to_sheet(persRows);
+    ws3['!cols']=[{wch:4},{wch:30},{wch:16},{wch:22},{wch:22}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Personal');
+
+    const fname=`Permiso_Trabajo_${os||'NIRSA'}_${fecha||new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb,fname);
+    showToast('✅ Excel descargado correctamente');
+  }catch(e){
+    showToast('❌ Error al generar Excel: '+e.message);
+  }
+}
+
+/* INIT */
+document.getElementById('fecha').value=new Date().toISOString().split('T')[0];
+renderChecks(riesgos,'riesgos-grid');
+renderChecks(epp,'epp-grid');
+for(let i=0;i<6;i++)addPersona();
+</script>
+</body>
+</html>
