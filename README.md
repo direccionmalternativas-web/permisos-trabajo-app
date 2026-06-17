@@ -1,4 +1,4 @@
-# Sistema de Permisos de Trabajo - NIRSA
+# Sistema de Permisos de Trabajo -SST
 
 Aplicación web para la gestión de permisos de trabajo en planta industrial.
 
